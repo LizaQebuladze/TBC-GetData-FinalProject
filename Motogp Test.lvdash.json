@@ -2,7 +2,7 @@
   "datasets": [
     {
       "name": "11e3e017",
-      "displayName": "Motogp Tire and Track Dynamics Data Overview",
+      "displayName": "Motogp Test Data",
       "queryLines": [
         "SELECT \n",
         "    SpeedKmH,\n",
@@ -10,7 +10,6 @@
         "    TrackGrip,\n",
         "    BikeMassKg,\n",
         "    TrackTemperature,\n",
-        "    -- TrackBankingDeg,\n",
         "    CASE \n",
         "        WHEN LOWER(TireType) = 'soft' THEN 'რბილი (Soft)'\n",
         "        WHEN LOWER(TireType) = 'medium' THEN 'საშუალო (Medium)'\n",
@@ -1300,6 +1299,9 @@
                   "scale": {
                     "type": "quantitative"
                   }
+                },
+                "label": {
+                  "show": true
                 }
               },
               "data": {
