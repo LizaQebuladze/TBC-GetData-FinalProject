@@ -1,7 +1,7 @@
 # TBC-GetData-FinalProject
 Final project for data analytics course (TBC-GetData)
 
-### 1. საწყისი მონაცემების მომზადება (`getdata.raw`)
+### 1. ნედლი ცხრილის შექმნა CSV ფაილიდან (`00_creating_raw_table_from_csv`)
 `motogp_dataset_v2.csv` ფაილიდან მონაცემები ატვირთვისას ზუსტად გავწერე შესაბამისი ტიპებით `getdata.raw.MotogpTest` სქემაში, რათა უზრუნველყოფილიყო თითოეული სვეტის სტრუქტურული მთლიანობა:
 * `SpeedKmH` (`DECIMAL(10,2)`): მოტოციკლის სიჩქარე კმ/სთ-ში (მაგ: `200.06`).
 * `CornerRadiusM` (`DECIMAL(10,2)`): მოსახვევის რადიუსი მეტრებში (მაგ: `42.54`).
@@ -9,7 +9,7 @@ Final project for data analytics course (TBC-GetData)
 * `BikeMassKg` (`DECIMAL(10,2)`): მოტოციკლის მასა კილოგრამებში (მაგ: `150.75`).
 * `TrackTemperature` (`DECIMAL(10,2)`): ტრასის ტემპერატურა გრადუს ცელსიუსში (მაგ: `43.52`).
 * `TrackBankingDeg` (`DECIMAL(10,2)`): ტრასის დახრილობის კუთხე გრადუსებში (მაგ: `2.76`).
-* `TireType` (`VARCHAR`): საბურავის ტიპი (მაგ: `hard`).
+* `TireType` (`STRING`): საბურავის ტიპი (მაგ: `hard`).
 * `LeanAngleDeg` (`DECIMAL(10,2)`): რეალური გადახრის კუთხე გრადუსებში (მაგ: `65.00`).
 
 ---
