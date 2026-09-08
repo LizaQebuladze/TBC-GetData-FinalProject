@@ -1,0 +1,3091 @@
+{
+  "datasets": [
+    {
+      "name": "11e3e017",
+      "displayName": "Motogp Tire and Track Dynamics Data Overview",
+      "queryLines": [
+        "SELECT \n",
+        "    SpeedKmH,\n",
+        "    CornerRadiusM,\n",
+        "    TrackGrip,\n",
+        "    BikeMassKg,\n",
+        "    TrackTemperature,\n",
+        "    -- TrackBankingDeg,\n",
+        "    CASE \n",
+        "        WHEN LOWER(TireType) = 'soft' THEN 'რბილი (Soft)'\n",
+        "        WHEN LOWER(TireType) = 'medium' THEN 'საშუალო (Medium)'\n",
+        "        WHEN LOWER(TireType) = 'hard' THEN 'მაგარი (Hard)'\n",
+        "        ELSE TireType\n",
+        "    END AS TireTypeGeo,\n",
+        "    LeanAngleDeg,\n",
+        "    TheoreticalLeanDeg,\n",
+        "    CentripetalAccelMs2,\n",
+        "    CornerType,\n",
+        "    TemperatureZone,\n",
+        "    TrackInclination,\n",
+        "    GripLevel\n",
+        "FROM getdata.calculated.MotogpTest\n",
+        "WHERE LeanAngleDeg >= :MinAngle;\n"
+      ],
+      "parameters": [
+        {
+          "displayName": "MinAngle",
+          "keyword": "MinAngle",
+          "dataType": "STRING",
+          "defaultSelection": {
+            "values": {
+              "dataType": "STRING",
+              "values": [
+                {
+                  "value": "30"
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "columns": [
+        {
+          "displayName": "მაღალი რისკის ჩანაწერები",
+          "description": "",
+          "expression": "SUM(CASE WHEN LeanAngleDeg > 50 THEN 1 ELSE 0 END)"
+        },
+        {
+          "displayName": "მაღალი ტემპერატურის საშუალო სიჩქარე",
+          "description": "",
+          "expression": "AVG(CASE WHEN TrackTemperature > 40 THEN SpeedKmH END)"
+        },
+        {
+          "displayName": "დაბალი ტემპერატურის საშუალო სიჩქარე",
+          "description": "",
+          "expression": "AVG(CASE WHEN TrackTemperature <= 30 THEN SpeedKmH END)"
+        },
+        {
+          "displayName": "მოსახვევის რადიუსი",
+          "description": "Corner radius grouped into 5-meter bins",
+          "expression": "FLOOR(`CornerRadiusM` / 5) * 5"
+        },
+        {
+          "displayName": "მოტოციკლის გადახრის კუთხე",
+          "description": " Corner lean degree grouped into 5-degree bins",
+          "expression": "FLOOR(`LeanAngleDeg` / 5) * 5"
+        },
+        {
+          "displayName": "თეორიული მოტოციკლის დახრის კუთხე",
+          "description": "Theoretical corner lean degree grouped into 5-degree bins",
+          "expression": "FLOOR(`TheoreticalLeanDeg` / 5) * 5"
+        },
+        {
+          "displayName": "მოტოციკლის მასა",
+          "description": "Motorcycle's weight grouped into 5-kg bins",
+          "expression": "FLOOR(`BikeMassKg` / 5) * 5"
+        },
+        {
+          "displayName": "საშუალო არითმეტიკული თეორიული და რეალური გადახრის კუთხეების სხვაობის",
+          "description": "",
+          "expression": "AVG(TheoreticalLeanDeg-LeanAngleDeg)"
+        },
+        {
+          "displayName": "მოტოციკლეტის სიჩქარე",
+          "description": "Motorcycle's speed grouped into 5-km/h bins",
+          "expression": "FLOOR(`SpeedKmH` / 5) * 5"
+        },
+        {
+          "displayName": "საშუალო ტემპერატურის საშუალო სიჩქარე",
+          "description": "",
+          "expression": "AVG(CASE WHEN TrackTemperature <= 40 AND TrackTemperature>30 THEN SpeedKmH END)"
+        }
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "1334c8f0",
+      "displayName": "გადახრის კუთხე",
+      "layout": [
+        {
+          "widget": {
+            "name": "saburavis-tipi",
+            "queries": [
+              {
+                "name": "dashboards/01f1aa171e4b1e94a8d4b0a65ca11636/datasets/01f1aa1723f8121385f80d2adc605c3c_TireTypeGeo",
+                "query": {
+                  "datasetName": "11e3e017",
+                  "fields": [
+                    {
+                      "name": "TireTypeGeo",
+                      "expression": "`TireTypeGeo`"
+                    },
+                    {
+                      "name": "TireTypeGeo_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "საბურავის ტიპი",
+                  "fields": []
+                }
+              },
+              "widgetType": "filter-single-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "TireTypeGeo",
+                    "queryName": "dashboards/01f1aa171e4b1e94a8d4b0a65ca11636/datasets/01f1aa1723f8121385f80d2adc605c3c_TireTypeGeo"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 2,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "mototsiklis-min-sichqare-km-st",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "11e3e017",
+                  "fields": [
+                    {
+                      "name": "min(SpeedKmH)",
+                      "expression": "MIN(`SpeedKmH`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "მოტოციკლის მინ. სიჩქარე (კმ/სთ)",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "min(SpeedKmH)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 0,
+            "width": 2,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "mototsiklis-max-sichqare-km-st",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "11e3e017",
+                  "fields": [
+                    {
+                      "name": "max(SpeedKmH)",
+                      "expression": "MAX(`SpeedKmH`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "მოტოციკლის მაქს. სიჩქარე (კმ/სთ)",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "max(SpeedKmH)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 0,
+            "width": 2,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "mototsiklis-min-gadakhris-kutkhe1",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "11e3e017",
+                  "fields": [
+                    {
+                      "name": "max(LeanAngleDeg)",
+                      "expression": "MAX(`LeanAngleDeg`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "მოტოციკლის მაქს. გადახრის კუთხე (°)",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "max(LeanAngleDeg)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 0,
+            "width": 2,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "mototsiklis-min-gadakhris-kutkhe",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "11e3e017",
+                  "fields": [
+                    {
+                      "name": "min(LeanAngleDeg)",
+                      "expression": "MIN(`LeanAngleDeg`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "მოტოციკლის მინ. გადახრის კუთხე (°)",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "min(LeanAngleDeg)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 0,
+            "width": 2,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "a2c37e52",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "11e3e017",
+                  "fields": [
+                    {
+                      "name": "avg(BikeMassKg)",
+                      "expression": "AVG(`BikeMassKg`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "მოტოციკლის საშუალო მასა (კგ)",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "avg(BikeMassKg)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 10,
+            "y": 0,
+            "width": 2,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "sashualo-gadakhris-kutkhe-mosakhvevis-tipis-mikhedvit",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "11e3e017",
+                  "fields": [
+                    {
+                      "name": "avg(LeanAngleDeg)",
+                      "expression": "AVG(`LeanAngleDeg`)"
+                    },
+                    {
+                      "name": "CornerType",
+                      "expression": "`CornerType`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "საშუალო გადახრის კუთხე მოსახვევის ტიპის მიხედვით",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "avg(LeanAngleDeg)",
+                  "displayName": "მოტოციკლის საშუალო გადახრის კუთხე (°)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "CornerType",
+                  "displayName": "მოსახვევის ტიპი",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 3,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "sashualo-sxvaoba-mototsiklis-realur-da-teoriul-gadakhris-kutkhe",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "11e3e017",
+                  "fields": [
+                    {
+                      "name": "CornerType",
+                      "expression": "`CornerType`"
+                    },
+                    {
+                      "name": "მოტოციკლის გადახრის კუთხე",
+                      "expression": "`მოტოციკლის გადახრის კუთხე`"
+                    },
+                    {
+                      "name": "measure(საშუალო არითმეტიკული თეორიული და რეალური გადახრის კუთხეების სხვაობის)",
+                      "expression": "MEASURE(`საშუალო არითმეტიკული თეორიული და რეალური გადახრის კუთხეების სხვაობის`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "მოტოციკლის რეალურ და თეორიულ გადახრის კუთხეებს შორის სხვაობის საშუალოს დამოკიდებულება გადახრის კუთხესთან",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "მოტოციკლის გადახრის კუთხე",
+                  "axis": {
+                    "title": "მოტოციკლის გადახრის კუთხე (°)"
+                  },
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "measure(საშუალო არითმეტიკული თეორიული და რეალური გადახრის კუთხეების სხვაობის)",
+                  "axis": {
+                    "title": "სხვაობა (°)"
+                  },
+                  "displayName": "სხვაობა",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "CornerType",
+                  "displayName": "მოსახვევის ტიპი",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "custom-order",
+                      "orderedValues": [
+                        "ფართო (>150m)",
+                        "საშუალო (80-150m)",
+                        "მკვეთრი (<80m)"
+                      ]
+                    },
+                    "mappings": [
+                      {
+                        "value": "მკვეთრი (<80m)",
+                        "color": "#99BDC9"
+                      },
+                      {
+                        "value": "საშუალო (80-150m)",
+                        "color": "#268BA8"
+                      },
+                      {
+                        "value": "ფართო (>150m)",
+                        "color": "#005340"
+                      }
+                    ]
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 3,
+            "width": 6,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "gadakhris-kutkhe-sashualo-gzis-mochidva",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "11e3e017",
+                  "fields": [
+                    {
+                      "name": "bin(LeanAngleDeg, binWidth=5)",
+                      "expression": "BIN_FLOOR(`LeanAngleDeg`, 5)"
+                    },
+                    {
+                      "name": "avg(TrackGrip)",
+                      "expression": "AVG(`TrackGrip`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "გადახრის კუთხის საშუალო გზის მოჭიდება",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "histogram",
+              "encodings": {
+                "x": {
+                  "fieldName": "bin(LeanAngleDeg, binWidth=5)",
+                  "displayName": "გადახრის კუთხე (°)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "avg(TrackGrip)",
+                  "displayName": "საშუალო გზის მოჭიდება",
+                  "scale": {
+                    "type": "quantitative",
+                    "domain": {
+                      "min": 0.85
+                    }
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 10,
+            "width": 6,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "gadakhris-kutkhe-sashualo-sichqare-mosakhvevis-tipis",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "11e3e017",
+                  "fields": [
+                    {
+                      "name": "CornerType",
+                      "expression": "`CornerType`"
+                    },
+                    {
+                      "name": "მოტოციკლის გადახრის კუთხე",
+                      "expression": "`მოტოციკლის გადახრის კუთხე`"
+                    },
+                    {
+                      "name": "avg(SpeedKmH)",
+                      "expression": "AVG(`SpeedKmH`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "გადახრის კუთხის საშუალო სიჩქარე თითოეული მოსახვევის ტიპისთვის",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "მოტოციკლის გადახრის კუთხე",
+                  "displayName": "მოტოციკლის გადახრის კუთხე (°)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "avg(SpeedKmH)",
+                  "displayName": "საშუალო სიჩქარე (კმ/სთ)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "CornerType",
+                  "legend": {
+                    "title": "მოახვევის ტიპი"
+                  },
+                  "displayName": "მოსახვევის ტიპი",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "custom-order",
+                      "orderedValues": [
+                        "ფართო (>150m)",
+                        "საშუალო (80-150m)",
+                        "მკვეთრი (<80m)"
+                      ]
+                    },
+                    "mappings": [
+                      {
+                        "value": "მკვეთრი (<80m)",
+                        "color": "#93CCDD"
+                      },
+                      {
+                        "value": "საშუალო (80-150m)",
+                        "color": "#0688AC"
+                      },
+                      {
+                        "value": "ფართო (>150m)",
+                        "color": "#205745"
+                      }
+                    ]
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 9,
+            "width": 6,
+            "height": 8
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "6db318f7",
+      "displayName": "სიჩქარის ფიზიკა",
+      "layout": [
+        {
+          "widget": {
+            "name": "mosakhvevis-radiusi-metri",
+            "queries": [
+              {
+                "name": "dashboards/01f1aa171e4b1e94a8d4b0a65ca11636/datasets/01f1aa1723f8121385f80d2adc605c3c_CornerType",
+                "query": {
+                  "datasetName": "11e3e017",
+                  "fields": [
+                    {
+                      "name": "CornerType",
+                      "expression": "`CornerType`"
+                    },
+                    {
+                      "name": "CornerType_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "მოსახვევის ტიპი",
+                  "fields": []
+                }
+              },
+              "widgetType": "filter-single-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "CornerType",
+                    "queryName": "dashboards/01f1aa171e4b1e94a8d4b0a65ca11636/datasets/01f1aa1723f8121385f80d2adc605c3c_CornerType"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "maksimaluri-gadakhvis-kutkhe",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "11e3e017",
+                  "fields": [
+                    {
+                      "name": "avg(LeanAngleDeg)",
+                      "expression": "AVG(`LeanAngleDeg`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "საშუალო გადახრის კუთხე (°)",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "avg(LeanAngleDeg)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 0,
+            "width": 2,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "maksimaluri-centriskuli-achqareba-ms2",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "11e3e017",
+                  "fields": [
+                    {
+                      "name": "max(CentripetalAccelMs2)",
+                      "expression": "MAX(`CentripetalAccelMs2`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "მაქსიმალური ცენტრისკენული აჩქარება (m/s²)",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "max(CentripetalAccelMs2)",
+                  "format": {
+                    "type": "number-plain",
+                    "abbreviation": "compact",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 2
+                    }
+                  },
+                  "style": {
+                    "rules": [
+                      {
+                        "condition": {
+                          "operator": ">="
+                        },
+                        "color": "#00A972"
+                      }
+                    ]
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 0,
+            "width": 3,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "maghali-riskis-chanacrebebi-50",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "11e3e017",
+                  "fields": [
+                    {
+                      "name": "measure(მაღალი რისკის ჩანაწერები)",
+                      "expression": "MEASURE(`მაღალი რისკის ჩანაწერები`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "მაღალი რისკის ჩანაწერები (>50°)",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(მაღალი რისკის ჩანაწერები)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 0,
+            "width": 2,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "telemeteriis-chanacrebis-raodenoba",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "11e3e017",
+                  "fields": [
+                    {
+                      "name": "avg(SpeedKmH)",
+                      "expression": "AVG(`SpeedKmH`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "საშუალო სიჩქარე (km/h)",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "avg(SpeedKmH)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 10,
+            "y": 0,
+            "width": 2,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "b9c2ab48",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "11e3e017",
+                  "fields": [
+                    {
+                      "name": "მოსახვევის რადიუსი",
+                      "expression": "`მოსახვევის რადიუსი`"
+                    },
+                    {
+                      "name": "avg(SpeedKmH)",
+                      "expression": "AVG(`SpeedKmH`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "მოსახვევის რადიუსის გავლენა სიჩქარეზე",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "მოსახვევის რადიუსი",
+                  "displayName": "მოსახვევის რადიუსი (მ)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "avg(SpeedKmH)",
+                  "displayName": "მოტოციკლის საშუალო სიჩქარე (კმ/სთ)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 12,
+            "width": 6,
+            "height": 8
+          }
+        },
+        {
+          "widget": {
+            "name": "mosakhvevis-radiusisa-mochidebis-gansatslebis-hitmepi",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "11e3e017",
+                  "fields": [
+                    {
+                      "name": "avg(SpeedKmH)",
+                      "expression": "AVG(`SpeedKmH`)"
+                    },
+                    {
+                      "name": "GripLevel",
+                      "expression": "`GripLevel`"
+                    },
+                    {
+                      "name": "მოტოციკლის გადახრის კუთხე",
+                      "expression": "`მოტოციკლის გადახრის კუთხე`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "საშუალო სიჩქარე მოჭიდებისა და დახრილობის მიხედვით",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "heatmap",
+              "encodings": {
+                "x": {
+                  "fieldName": "GripLevel",
+                  "displayName": "მოჭიდების დონე",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "custom-order",
+                      "orderedValues": [
+                        "დაბალი (<0.85)",
+                        "საშუალო (0.85-0.95)",
+                        "მაღალი (>0.95)"
+                      ]
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "მოტოციკლის გადახრის კუთხე",
+                  "displayName": "გადახრის კუთხე (°)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "avg(SpeedKmH)",
+                  "displayName": "საშუალო სიჩქარე (კმ/სთ)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 4,
+            "width": 4,
+            "height": 8
+          }
+        },
+        {
+          "widget": {
+            "name": "sashualo-sichqare-temperaturis-dakhrilobis-mikhedvit",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "11e3e017",
+                  "fields": [
+                    {
+                      "name": "avg(SpeedKmH)",
+                      "expression": "AVG(`SpeedKmH`)"
+                    },
+                    {
+                      "name": "TemperatureZone",
+                      "expression": "`TemperatureZone`"
+                    },
+                    {
+                      "name": "GripLevel",
+                      "expression": "`GripLevel`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "საშუალო სიჩქარე ტემპერატურისა და მოჭიდების მიხედვით",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "heatmap",
+              "encodings": {
+                "x": {
+                  "fieldName": "TemperatureZone",
+                  "axis": {
+                    "labelAngle": 0
+                  },
+                  "displayName": "ტემპერატურის ზონა",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "custom-order",
+                      "orderedValues": [
+                        "გრილი (<30°C)",
+                        "ოპტიმალური (30-40°C)",
+                        "ცხელი (>40°C)"
+                      ]
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "GripLevel",
+                  "axis": {
+                    "title": "მოჭიდების დონე"
+                  },
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "custom-order",
+                      "orderedValues": [
+                        "მაღალი (>0.95)",
+                        "საშუალო (0.85-0.95)",
+                        "დაბალი (<0.85)"
+                      ]
+                    }
+                  }
+                },
+                "color": {
+                  "fieldName": "avg(SpeedKmH)",
+                  "displayName": "საშუალო სიჩქარე (კმ/სთ)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 4,
+            "width": 4,
+            "height": 8
+          }
+        },
+        {
+          "widget": {
+            "name": "mosakhvevis-radiusis-gavlena-gadakhvis-kutkheze",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "11e3e017",
+                  "fields": [
+                    {
+                      "name": "მოსახვევის რადიუსი",
+                      "expression": "`მოსახვევის რადიუსი`"
+                    },
+                    {
+                      "name": "avg(LeanAngleDeg)",
+                      "expression": "AVG(`LeanAngleDeg`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "მოსახვევის რადიუსის გავლენა გადახრის კუთხეზე",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "მოსახვევის რადიუსი",
+                  "displayName": "მოსახვევის რადიუსი (მ)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "avg(LeanAngleDeg)",
+                  "displayName": "საშუალო მოტოციკლის გადახრის კუთხე (°)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 12,
+            "width": 6,
+            "height": 8
+          }
+        },
+        {
+          "widget": {
+            "name": "mochidebis-doneebis-sashualo-centriskuli-achqareba",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "11e3e017",
+                  "fields": [
+                    {
+                      "name": "GripLevel",
+                      "expression": "`GripLevel`"
+                    },
+                    {
+                      "name": "avg(SpeedKmH)",
+                      "expression": "AVG(`SpeedKmH`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "მოჭიდების დონეების საშუალო ცენტრისკენული აჩქარება",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "GripLevel",
+                  "displayName": "მოჭიდების დონე",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "custom-order",
+                      "orderedValues": [
+                        "დაბალი (<0.85)",
+                        "საშუალო (0.85-0.95)",
+                        "მაღალი (>0.95)"
+                      ]
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "avg(SpeedKmH)",
+                  "displayName": "საშუალო ცენტრისკენული აჩქარება (მ/წმ²)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 4,
+            "width": 4,
+            "height": 8
+          }
+        },
+        {
+          "widget": {
+            "name": "12d8636f",
+            "queries": [
+              {
+                "name": "dashboards/01f1aa171e4b1e94a8d4b0a65ca11636/datasets/01f1aa1723f8121385f80d2adc605c3c_TireTypeGeo",
+                "query": {
+                  "datasetName": "11e3e017",
+                  "fields": [
+                    {
+                      "name": "TireTypeGeo",
+                      "expression": "`TireTypeGeo`"
+                    },
+                    {
+                      "name": "TireTypeGeo_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "disallowAll": true,
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "საბურავის ტიპი",
+                  "fields": []
+                }
+              },
+              "widgetType": "filter-single-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "TireTypeGeo",
+                    "queryName": "dashboards/01f1aa171e4b1e94a8d4b0a65ca11636/datasets/01f1aa1723f8121385f80d2adc605c3c_TireTypeGeo"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 3,
+            "height": 2
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "5757d6b2",
+      "displayName": "კრიტიკული გადახრები",
+      "layout": [
+        {
+          "widget": {
+            "name": "049ad679",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "11e3e017",
+                  "fields": [
+                    {
+                      "name": "TireTypeGeo",
+                      "expression": "`TireTypeGeo`"
+                    },
+                    {
+                      "name": "bin(TrackTemperature, binWidth=5)",
+                      "expression": "BIN_FLOOR(`TrackTemperature`, 5)"
+                    },
+                    {
+                      "name": "avg(LeanAngleDeg)",
+                      "expression": "AVG(`LeanAngleDeg`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "გადახრის კუთხე ტემპერატურის მიხედვით",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "histogram",
+              "encodings": {
+                "x": {
+                  "fieldName": "bin(TrackTemperature, binWidth=5)",
+                  "displayName": "ტემპერატურა (°C)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "avg(LeanAngleDeg)",
+                  "displayName": "საშუალო გადახრის კუთხე (°)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "TireTypeGeo",
+                  "displayName": "საბურავის ტიპი",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "custom-order",
+                      "orderedValues": [
+                        "მაგარი (Hard)",
+                        "საშუალო (Medium)",
+                        "რბილი (Soft)"
+                      ]
+                    },
+                    "mappings": [
+                      {
+                        "value": "რბილი (Soft)",
+                        "color": "#7EB3C7"
+                      },
+                      {
+                        "value": "საშუალო (Medium)",
+                        "color": "#4092AC"
+                      },
+                      {
+                        "value": "მაგარი (Hard)",
+                        "color": {
+                          "themeColorType": "visualizationColors",
+                          "position": 1
+                        }
+                      }
+                    ]
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 18,
+            "width": 6,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "fbb1728d",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "11e3e017",
+                  "fields": [
+                    {
+                      "name": "TrackInclination",
+                      "expression": "`TrackInclination`"
+                    },
+                    {
+                      "name": "avg(LeanAngleDeg)",
+                      "expression": "AVG(`LeanAngleDeg`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "მოტოციკლის საშუალო გადახრის კუთხე გზის დახრილობის მიხედვით",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "mark": {
+                "colors": [
+                  "#13728F",
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 8
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 9
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 10
+                  }
+                ]
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "TrackInclination",
+                  "displayName": "გზის დახრილობა",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "avg(LeanAngleDeg)",
+                  "displayName": "საშუალო გადახტის კუთხე (°)",
+                  "scale": {
+                    "type": "quantitative",
+                    "domain": {
+                      "min": 40
+                    }
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 0,
+            "width": 3,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "d5f0e8c4",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "11e3e017",
+                  "fields": [
+                    {
+                      "name": "TireTypeGeo",
+                      "expression": "`TireTypeGeo`"
+                    },
+                    {
+                      "name": "თეორიული მოტოციკლის დახრის კუთხე",
+                      "expression": "`თეორიული მოტოციკლის დახრის კუთხე`"
+                    },
+                    {
+                      "name": "avg(მოტოციკლის გადახრის კუთხე)",
+                      "expression": "AVG(`მოტოციკლის გადახრის კუთხე`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "<p>&nbsp;</p>\n\nთეორიული vs რეალური გადახრის კუთხე",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "mark": {
+                "size": 0.6
+              },
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "თეორიული მოტოციკლის დახრის კუთხე",
+                  "displayName": "მოტოციკლის თეორიული გადახრის კუთხე (°)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "avg(მოტოციკლის გადახრის კუთხე)",
+                  "displayName": "მოტოციკლის საშუალო გადახრის კუთხე (°)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "TireTypeGeo",
+                  "displayName": "საბურავის ტიპი",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "custom-order",
+                      "orderedValues": [
+                        "მაგარი (Hard)",
+                        "საშუალო (Medium)",
+                        "რბილი (Soft)"
+                      ]
+                    },
+                    "mappings": [
+                      {
+                        "value": "რბილი (Soft)",
+                        "color": "#94BBC7"
+                      },
+                      {
+                        "value": "საშუალო (Medium)",
+                        "color": "#2D849E"
+                      },
+                      {
+                        "value": "მაგარი (Hard)",
+                        "color": "#06575E"
+                      }
+                    ]
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 7,
+            "width": 6,
+            "height": 11
+          }
+        },
+        {
+          "widget": {
+            "name": "457f539b",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "11e3e017",
+                  "fields": [
+                    {
+                      "name": "bin(SpeedKmH, binWidth=10)",
+                      "expression": "BIN_FLOOR(`SpeedKmH`, 10)"
+                    },
+                    {
+                      "name": "avg(LeanAngleDeg)",
+                      "expression": "AVG(`LeanAngleDeg`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "საშუალო გადახრის კუთხე სიჩქარის მიხედვით",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "mark": {
+                "colors": [
+                  "#0D7EA2",
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 8
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 9
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 10
+                  }
+                ]
+              },
+              "widgetType": "histogram",
+              "encodings": {
+                "x": {
+                  "fieldName": "bin(SpeedKmH, binWidth=10)",
+                  "displayName": "მოტოციკლის სიჩქარე (კმ/სთ)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "avg(LeanAngleDeg)",
+                  "displayName": "საშუალო გადახრის კუთხე (°)",
+                  "scale": {
+                    "type": "quantitative",
+                    "domain": {
+                      "min": 30
+                    }
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 6,
+            "height": 10
+          }
+        },
+        {
+          "widget": {
+            "name": "9740ad58",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "11e3e017",
+                  "fields": [
+                    {
+                      "name": "TrackInclination",
+                      "expression": "`TrackInclination`"
+                    },
+                    {
+                      "name": "avg(SpeedKmH)",
+                      "expression": "AVG(`SpeedKmH`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "მოტოციკლის საშუალო სიჩქარე გზის დახრილობის მიხედვით",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "TrackInclination",
+                  "displayName": "გზის დახრილობა",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "avg(SpeedKmH)",
+                  "displayName": "საშუალო სიჩქარე (კმ/სთ)",
+                  "scale": {
+                    "type": "quantitative",
+                    "domain": {
+                      "min": 140
+                    }
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 9,
+            "y": 0,
+            "width": 3,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "f8295e1b",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "11e3e017",
+                  "fields": [
+                    {
+                      "name": "GripLevel",
+                      "expression": "`GripLevel`"
+                    },
+                    {
+                      "name": "CornerType",
+                      "expression": "`CornerType`"
+                    },
+                    {
+                      "name": "avg(SpeedKmH)",
+                      "expression": "AVG(`SpeedKmH`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "საშუალო სიჩქარე მოჭიდების დონისა და მოსახვევის ტიპის მიხედვით",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "mark": {
+                "layout": "group"
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "CornerType",
+                  "displayName": "მოსახვევის ტიპი",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "avg(SpeedKmH)",
+                  "axis": {
+                    "title": "საშუალო სიჩქარე (კმ/სთ)"
+                  },
+                  "scale": {
+                    "type": "quantitative",
+                    "reverse": false
+                  }
+                },
+                "color": {
+                  "fieldName": "GripLevel",
+                  "legend": {
+                    "title": "მოჭიდების დონე"
+                  },
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "custom-order",
+                      "orderedValues": [
+                        "დაბალი (<0.85)",
+                        "საშუალო (0.85-0.95)",
+                        "მაღალი (>0.95)"
+                      ]
+                    },
+                    "mappings": [
+                      {
+                        "value": "დაბალი (<0.85)",
+                        "color": "#75A1AF"
+                      },
+                      {
+                        "value": "მაღალი (>0.95)",
+                        "color": "#077A9D"
+                      },
+                      {
+                        "value": "საშუალო (0.85-0.95)",
+                        "color": "#268BA8"
+                      }
+                    ]
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 10,
+            "width": 6,
+            "height": 8
+          }
+        },
+        {
+          "widget": {
+            "name": "915c5df3",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "11e3e017",
+                  "fields": [
+                    {
+                      "name": "CornerType",
+                      "expression": "`CornerType`"
+                    },
+                    {
+                      "name": "avg(CentripetalAccelMs2)",
+                      "expression": "AVG(`CentripetalAccelMs2`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "მოსახვევის ტიპების საშუალო ცენტრისკენული აჩქარება",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "mark": {
+                "colors": [
+                  "#319CBD",
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 8
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 9
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 10
+                  }
+                ],
+                "layout": "group"
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "CornerType",
+                  "displayName": "მოსახვევის ტიპი",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "avg(CentripetalAccelMs2)",
+                  "displayName": "საშუალო ცენტრისკენული აჩქარება (მ/წმ²)",
+                  "scale": {
+                    "type": "quantitative",
+                    "reverse": false
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 18,
+            "width": 6,
+            "height": 7
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "0f7ab65a",
+      "displayName": "ანომალიები",
+      "layout": [
+        {
+          "widget": {
+            "name": "mototsiklis-sashualo-sichqare-mosakhvevis-radiusis-mikhedvit",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "11e3e017",
+                  "fields": [
+                    {
+                      "name": "bin(BikeMassKg, binWidth=3)",
+                      "expression": "BIN_FLOOR(`BikeMassKg`, 3)"
+                    },
+                    {
+                      "name": "avg(SpeedKmH)",
+                      "expression": "AVG(`SpeedKmH`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "მოტოციკლის საშუალო სიჩქარე მოტოციკლის მასის მიხედვით",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "histogram",
+              "encodings": {
+                "x": {
+                  "fieldName": "bin(BikeMassKg, binWidth=3)",
+                  "displayName": "მოტოციკლის მასა (კგ)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "avg(SpeedKmH)",
+                  "displayName": "საშუალო სიჩქარე (კმ/სთ)",
+                  "scale": {
+                    "type": "quantitative",
+                    "domain": {
+                      "min": 130
+                    }
+                  }
+                },
+                "label": {
+                  "show": false
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 0,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "38507dc3",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "11e3e017",
+                  "fields": [
+                    {
+                      "name": "measure(დაბალი ტემპერატურის საშუალო სიჩქარე)",
+                      "expression": "MEASURE(`დაბალი ტემპერატურის საშუალო სიჩქარე`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "საშუალო სიჩქარე დაბალ ტემპერატურაზე (<30°C)",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(დაბალი ტემპერატურის საშუალო სიჩქარე)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 14,
+            "width": 2,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "51dba568",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "11e3e017",
+                  "fields": [
+                    {
+                      "name": "measure(მაღალი ტემპერატურის საშუალო სიჩქარე)",
+                      "expression": "MEASURE(`მაღალი ტემპერატურის საშუალო სიჩქარე`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "საშუალო სიჩქარე მაღალ ტემპერატურაზე (>40°C)",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(მაღალი ტემპერატურის საშუალო სიჩქარე)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 14,
+            "width": 2,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "centrinduli-achqareba-sichqaris-mikhedvit",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "11e3e017",
+                  "fields": [
+                    {
+                      "name": "bin(SpeedKmH, binWidth=10)",
+                      "expression": "BIN_FLOOR(`SpeedKmH`, 10)"
+                    },
+                    {
+                      "name": "avg(CentripetalAccelMs2)",
+                      "expression": "AVG(`CentripetalAccelMs2`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "**ცენტრიდანული აჩქარება სიჩქარის მიხედვით**",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "histogram",
+              "encodings": {
+                "x": {
+                  "fieldName": "bin(SpeedKmH, binWidth=10)",
+                  "displayName": "მოტოციკლის სიჩქარე (კმ/სთ)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "avg(CentripetalAccelMs2)",
+                  "displayName": "საშუალო ცენტრისკენული აჩქარება (მ/წმ² )",
+                  "scale": {
+                    "type": "quantitative",
+                    "reverse": false
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 13,
+            "width": 6,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "ccc12029",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "11e3e017",
+                  "fields": [
+                    {
+                      "name": "measure(საშუალო ტემპერატურის საშუალო სიჩქარე)",
+                      "expression": "MEASURE(`საშუალო ტემპერატურის საშუალო სიჩქარე`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "საშუალო სიჩქარე ოპტიმალურ ტემპერატურაზე (30°C-40°C)",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(საშუალო ტემპერატურის საშუალო სიჩქარე)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 14,
+            "width": 2,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "mototsiklis-masis-gavlena-sashualo-gadakhvis-kutkheze",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "11e3e017",
+                  "fields": [
+                    {
+                      "name": "მოტოციკლის მასა",
+                      "expression": "`მოტოციკლის მასა`"
+                    },
+                    {
+                      "name": "avg(LeanAngleDeg)",
+                      "expression": "AVG(`LeanAngleDeg`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "მოტოციკლის მასის გავლენა საშუალო გადახრის კუთხეზე",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "mark": {
+                "colors": [
+                  "#1EA2C9",
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 8
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 9
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 10
+                  }
+                ]
+              },
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "მოტოციკლის მასა",
+                  "displayName": "მოტოციკლის მასა (კგ)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "avg(LeanAngleDeg)",
+                  "displayName": "საშუალო გადახრის კუთხე (°)",
+                  "scale": {
+                    "type": "quantitative",
+                    "domain": {
+                      "min": 30
+                    }
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 6,
+            "width": 6,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "mototsiklis-mochideba-masis",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "11e3e017",
+                  "fields": [
+                    {
+                      "name": "მოტოციკლის მასა",
+                      "expression": "`მოტოციკლის მასა`"
+                    },
+                    {
+                      "name": "avg(TrackGrip)",
+                      "expression": "AVG(`TrackGrip`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "მოტოციკლის მასის გავლენა გზის საშუალო მოჭიდებაზე",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "მოტოციკლის მასა",
+                  "displayName": "მოტოციკლის მასა (კგ)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "avg(TrackGrip)",
+                  "displayName": "გზის საშუალო მოჭიდება",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 4,
+            "width": 6,
+            "height": 10
+          }
+        },
+        {
+          "widget": {
+            "name": "mosakhvevis-sashualo-radiusi-sichqaris-mikhedvit",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "11e3e017",
+                  "fields": [
+                    {
+                      "name": "bin(SpeedKmH, binWidth=10)",
+                      "expression": "BIN_FLOOR(`SpeedKmH`, 10)"
+                    },
+                    {
+                      "name": "avg(CornerRadiusM)",
+                      "expression": "AVG(`CornerRadiusM`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "**მოსახვევის საშუალო რადიუსი სიჩქარის მიხედვით**",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "histogram",
+              "encodings": {
+                "x": {
+                  "fieldName": "bin(SpeedKmH, binWidth=10)",
+                  "displayName": "საშუალო სიჩქარე (კმ/სთ)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "avg(CornerRadiusM)",
+                  "displayName": "მოსახვევის საშუალო რადიუსი (მ)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 20,
+            "width": 6,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "sashualo-temperatura-mototsiklis-sichqaris-mikhedvit",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "11e3e017",
+                  "fields": [
+                    {
+                      "name": "მოტოციკლეტის სიჩქარე",
+                      "expression": "`მოტოციკლეტის სიჩქარე`"
+                    },
+                    {
+                      "name": "avg(TrackTemperature)",
+                      "expression": "AVG(`TrackTemperature`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "საშუალო ტემპერატურა მოტოციკლის სიჩქარის მიხედვით",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "მოტოციკლეტის სიჩქარე",
+                  "displayName": "მოტოციკლის სიჩქარე (კმ/სთ)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "avg(TrackTemperature)",
+                  "displayName": "საშუალო ტემპერატურა (°C) ",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 18,
+            "width": 6,
+            "height": 9
+          }
+        },
+        {
+          "widget": {
+            "name": "gzis-min-mochideba",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "11e3e017",
+                  "fields": [
+                    {
+                      "name": "min(TrackGrip)",
+                      "expression": "MIN(`TrackGrip`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "გზის მინ. მოჭიდება",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "min(TrackGrip)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 2,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "gzis-maks-mochideba",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "11e3e017",
+                  "fields": [
+                    {
+                      "name": "max(TrackGrip)",
+                      "expression": "MAX(`TrackGrip`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "გზის მაქს. მოჭიდება",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "max(TrackGrip)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 0,
+            "width": 2,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "shualo-gzis-mochideba",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "11e3e017",
+                  "fields": [
+                    {
+                      "name": "avg(TrackGrip)",
+                      "expression": "AVG(`TrackGrip`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "საშუალო გზის მოჭიდება",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "avg(TrackGrip)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 0,
+            "width": 2,
+            "height": 4
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "9a2eccc4",
+      "displayName": "მოტოციკლის მასა",
+      "layout": [
+        {
+          "widget": {
+            "name": "maks-motociklis-masa-kg",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "11e3e017",
+                  "fields": [
+                    {
+                      "name": "max(BikeMassKg)",
+                      "expression": "MAX(`BikeMassKg`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "**მაქს. მოტოციკლის მასა (კგ)**",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "max(BikeMassKg)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 8,
+            "width": 2,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "min-motociklis-masa-kg",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "11e3e017",
+                  "fields": [
+                    {
+                      "name": "min(BikeMassKg)",
+                      "expression": "MIN(`BikeMassKg`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "**მინ. მოტოციკლის მასა (კგ)**",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "min(BikeMassKg)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 4,
+            "width": 2,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "77aa2409",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "11e3e017",
+                  "fields": [
+                    {
+                      "name": "მოტოციკლის მასა",
+                      "expression": "`მოტოციკლის მასა`"
+                    },
+                    {
+                      "name": "avg(TrackGrip)",
+                      "expression": "AVG(`TrackGrip`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "მოტოციკლის მასის გავლენა გზის საშუალო მოჭიდებაზე",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "მოტოციკლის მასა",
+                  "displayName": "მოტოციკლის მასა (კგ)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "avg(TrackGrip)",
+                  "displayName": "გზის საშუალო მოჭიდება",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 0,
+            "width": 4,
+            "height": 8
+          }
+        },
+        {
+          "widget": {
+            "name": "c5a06f33",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "11e3e017",
+                  "fields": [
+                    {
+                      "name": "bin(BikeMassKg, binWidth=3)",
+                      "expression": "BIN_FLOOR(`BikeMassKg`, 3)"
+                    },
+                    {
+                      "name": "avg(SpeedKmH)",
+                      "expression": "AVG(`SpeedKmH`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "მოტოციკლის საშუალო სიჩქარე მოტოციკლის მასის მიხედვით",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "histogram",
+              "encodings": {
+                "x": {
+                  "fieldName": "bin(BikeMassKg, binWidth=3)",
+                  "displayName": "მოტოციკლის მასა (კგ)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "avg(SpeedKmH)",
+                  "displayName": "საშუალო სიჩქარე (კმ/სთ)",
+                  "scale": {
+                    "type": "quantitative",
+                    "domain": {
+                      "min": 130
+                    }
+                  }
+                },
+                "label": {
+                  "show": false
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 8,
+            "width": 4,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "15f86ed8",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "11e3e017",
+                  "fields": [
+                    {
+                      "name": "მოტოციკლის მასა",
+                      "expression": "`მოტოციკლის მასა`"
+                    },
+                    {
+                      "name": "avg(LeanAngleDeg)",
+                      "expression": "AVG(`LeanAngleDeg`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "მოტოციკლის მასის გავლენა საშუალო გადახრის კუთხეზე",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "mark": {
+                "colors": [
+                  "#1EA2C9",
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 8
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 9
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 10
+                  }
+                ]
+              },
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "მოტოციკლის მასა",
+                  "displayName": "მოტოციკლის მასა (კგ)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "avg(LeanAngleDeg)",
+                  "displayName": "საშუალო გადახრის კუთხე (°)",
+                  "scale": {
+                    "type": "quantitative",
+                    "domain": {
+                      "min": 30
+                    }
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 9,
+            "width": 4,
+            "height": 6
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+    },
+    "applyModeEnabled": false
+  }
+}
