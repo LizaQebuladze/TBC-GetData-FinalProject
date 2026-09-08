@@ -471,6 +471,9 @@
                 }
               },
               "version": 3,
+              "mark": {
+                "size": 0.5
+              },
               "widgetType": "line",
               "encodings": {
                 "x": {
@@ -632,6 +635,9 @@
                 }
               },
               "version": 3,
+              "mark": {
+                "size": 0.8
+              },
               "widgetType": "line",
               "encodings": {
                 "x": {
@@ -979,6 +985,9 @@
                 }
               },
               "version": 3,
+              "mark": {
+                "size": 0.7
+              },
               "widgetType": "line",
               "encodings": {
                 "x": {
@@ -1216,6 +1225,9 @@
                 }
               },
               "version": 3,
+              "mark": {
+                "size": 0.8
+              },
               "widgetType": "line",
               "encodings": {
                 "x": {
@@ -2399,7 +2411,8 @@
                     "themeColorType": "visualizationColors",
                     "position": 10
                   }
-                ]
+                ],
+                "size": 0.8
               },
               "widgetType": "line",
               "encodings": {
@@ -2464,6 +2477,9 @@
                 }
               },
               "version": 3,
+              "mark": {
+                "size": 0.9
+              },
               "widgetType": "line",
               "encodings": {
                 "x": {
@@ -2587,6 +2603,9 @@
                 }
               },
               "version": 3,
+              "mark": {
+                "size": 0.5
+              },
               "widgetType": "line",
               "encodings": {
                 "x": {
